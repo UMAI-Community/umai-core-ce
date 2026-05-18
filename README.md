@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/umai-logo.png" alt="UMAI Core" width="320" />
+  <img src="docs/assets/umai-core-demo.svg" alt="UMAI Core — animated terminal demo showing kernel-resident XDP drops" width="100%" />
 </p>
 
 # UMAI Core (Community Edition)
