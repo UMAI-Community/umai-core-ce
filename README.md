@@ -1,4 +1,11 @@
 <p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/umai-logo.png">
+    <img src="docs/umai-logo-dark.png" alt="UMAI" width="240" />
+  </picture>
+</p>
+
+<p align="center">
   <img src="docs/assets/umai-core-demo.svg" alt="UMAI Core — animated terminal demo showing kernel-resident XDP drops" width="100%" />
 </p>
 
