@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
   <style>
     .bg { fill: #282a36; rx: 8px; }
     .terminal-header { fill: #44475a; }
@@ -13,25 +13,48 @@
     .log-block { fill: #ff5555; font-weight: bold; }
     .log-pass { fill: #50fa7b; }
 
-    /* Infinite Loop Timeline: Total loop duration 16 seconds */
-    @keyframes terminal-loop {
+    /* Global Infinite Loop Timeline (Total 18 Seconds) */
+    @keyframes line-fade {
       0%, 100% { opacity: 0; }
-      2% { opacity: 1; }
+      1% { opacity: 1; }
       94% { opacity: 1; }
       96% { opacity: 0; }
     }
 
-    .line1 { animation: terminal-loop 16s infinite; animation-delay: 0.5s; opacity: 0; }
-    .line2 { animation: terminal-loop 16s infinite; animation-delay: 2.0s; opacity: 0; }
-    .line3 { animation: terminal-loop 16s infinite; animation-delay: 4.0s; opacity: 0; }
-    .line4 { animation: terminal-loop 16s infinite; animation-delay: 5.5s; opacity: 0; }
-    .line5 { animation: terminal-loop 16s infinite; animation-delay: 7.5s; opacity: 0; }
-    .line6 { animation: terminal-loop 16s infinite; animation-delay: 9.5s; opacity: 0; }
-    .line7 { animation: terminal-loop 16s infinite; animation-delay: 11.0s; opacity: 0; }
-    .line8 { animation: terminal-loop 16s infinite; animation-delay: 13.0s; opacity: 0; }
+    /* Pure-SVG ClipPath Width Reveals to Simulate Typing */
+    @keyframes reveal-width {
+      0% { width: 0; }
+      100% { width: 600px; }
+    }
+
+    .line-comment { animation: line-fade 18s infinite; animation-delay: 0.5s; opacity: 0; }
+    .prompt-block { animation: line-fade 18s infinite; animation-delay: 1.2s; opacity: 0; }
+
+    /* Type out part 1 of the command string */
+    .cmd-part1 { animation: reveal-width 2.2s steps(45, end) forwards; animation-delay: 1.8s; }
+
+    /* Reveal part 2 of the command after the line wrap break */
+    .cmd-part2 { animation: reveal-width 1.2s steps(30, end) forwards; animation-delay: 4.0s; }
+
+    .line-boot { animation: line-fade 18s infinite; animation-delay: 5.5s; opacity: 0; }
+    .line3 { animation: line-fade 18s infinite; animation-delay: 7.5s; opacity: 0; }
+    .line4 { animation: line-fade 18s infinite; animation-delay: 9.0s; opacity: 0; }
+    .line5 { animation: line-fade 18s infinite; animation-delay: 11.0s; opacity: 0; }
+    .line6 { animation: line-fade 18s infinite; animation-delay: 13.0s; opacity: 0; }
+    .line7 { animation: line-fade 18s infinite; animation-delay: 14.5s; opacity: 0; }
+    .line8 { animation: line-fade 18s infinite; animation-delay: 16.0s; opacity: 0; }
   </style>
 
-  <rect width="800" height="450" class="bg" />
+  <defs>
+    <clipPath id="clip-line1">
+      <rect x="135" y="5" width="0" height="25" class="cmd-part1" />
+    </clipPath>
+    <clipPath id="clip-line2">
+      <rect x="20" y="25" width="0" height="25" class="cmd-part2" />
+    </clipPath>
+  </defs>
+
+  <rect width="800" height="480" class="bg" />
 
   <path d="M 0,0 H 800 V 30 H 0 Z" class="terminal-header" />
   <circle cx="20" cy="15" r="6" class="dot-red" />
@@ -40,43 +63,51 @@
   <text x="360" y="20" class="text" font-size="12">debian@umai-dev: ~</text>
 
   <g transform="translate(20, 60)">
-    <g class="line1">
+
+    <g class="line-comment">
       <text x="0" y="0" class="comment"># Run UMAI Core over Generic XDP Driver Path</text>
-      <text x="0" y="20" class="text"><tspan class="cmd">debian@umai-dev:~$</tspan> sudo ./target/release/umai-loader --iface eth0 --kernel-object dist/umai-kernel --xdpgeneric</text>
     </g>
 
-    <g class="line2">
-      <text x="0" y="50" class="text"><tspan class="log-info">INFO</tspan> umai-loader starting | iface=eth0 xdpgeneric=true</text>
-      <text x="0" y="70" class="text"><tspan class="log-info">INFO</tspan> loaded ELF into memory | bytes=1872</text>
-      <text x="0" y="90" class="text"><tspan class="log-info">INFO</tspan> attached XDP hook to interface: eth0 (Mode: XDP_GENERIC)</text>
-      <text x="0" y="110" class="text"><tspan class="log-info">INFO</tspan> [v0.2-roadmap] parsing wire-level AI protocols [ANS Subnets, MCP Core]</text>
-      <text x="0" y="130" class="text"><tspan class="log-info">INFO</tspan> starting telemetry heartbeat task (2s interval)</text>
+    <g class="prompt-block">
+      <text x="0" y="20" class="text"><tspan class="cmd">debian@umai-dev:~$</tspan></text>
+
+      <text x="135" y="20" class="text" clip-path="url(#clip-line1)">sudo ./target/release/umai-loader --iface eth0 \</text>
+
+      <text x="20" y="40" class="text" clip-path="url(#clip-line2)">--kernel-object dist/umai-kernel --xdpgeneric</text>
+    </g>
+
+    <g class="line-boot">
+      <text x="0" y="75" class="text"><tspan class="log-info">INFO</tspan> umai-loader starting | iface=eth0 xdpgeneric=true</text>
+      <text x="0" y="95" class="text"><tspan class="log-info">INFO</tspan> loaded ELF into memory | bytes=1872</text>
+      <text x="0" y="115" class="text"><tspan class="log-info">INFO</tspan> attached XDP hook to interface: eth0 (Mode: XDP_GENERIC)</text>
+      <text x="0" y="135" class="text"><tspan class="log-info">INFO</tspan> [v0.2-roadmap] parsing wire-level AI protocols [ANS Subnets, MCP Core]</text>
+      <text x="0" y="155" class="text"><tspan class="log-info">INFO</tspan> starting telemetry heartbeat task (2s interval)</text>
     </g>
 
     <g class="line3">
-      <text x="0" y="160" class="text">2026-05-18T16:20:02Z [<tspan class="log-pass">PASS</tspan>] Traffic Ingress | Src: 10.254.12.44 -&gt; Dest: Local Node | Wire OK</text>
+      <text x="0" y="190" class="text">2026-05-18T16:20:02Z [<tspan class="log-pass">PASS</tspan>] Traffic Ingress | Src: 10.254.12.44 -&gt; Dest: Local Node | Wire OK</text>
     </g>
 
     <g class="line4">
-      <text x="0" y="180" class="text">2026-05-18T16:20:04Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=0</tspan> legit_ai_traffic_passed=1</text>
+      <text x="0" y="210" class="text">2026-05-18T16:20:04Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=0</tspan> legit_ai_traffic_passed=1</text>
     </g>
 
     <g class="line5">
-      <text x="0" y="210" class="text">2026-05-18T16:20:07Z [<tspan class="log-warn">WARN</tspan>] IDENTIFIED: Malicious Actor Intel Signature match on interface segment from 1.2.3.4</text>
-      <text x="0" y="230" class="text">2026-05-18T16:20:07Z [ACTION] Committing target boundary 1.2.3.4 to kernel space map [umai_intel_map]</text>
+      <text x="0" y="245" class="text">2026-05-18T16:20:07Z [<tspan class="log-warn">WARN</tspan>] IDENTIFIED: Malicious Actor Intel Signature match on interface segment from 1.2.3.4</text>
+      <text x="0" y="265" class="text">2026-05-18T16:20:07Z [ACTION] Committing target boundary 1.2.3.4 to kernel space map [umai_intel_map]</text>
     </g>
 
     <g class="line6">
-      <text x="0" y="260" class="text">2026-05-18T16:20:09Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted unauthorized boundary package entry from 1.2.3.4</text>
+      <text x="0" y="300" class="text">2026-05-18T16:20:09Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted unauthorized boundary package entry from 1.2.3.4</text>
     </g>
 
     <g class="line7">
-      <text x="0" y="280" class="text">2026-05-18T16:20:10Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=1</tspan> legit_ai_traffic_passed=1</text>
+      <text x="0" y="320" class="text">2026-05-18T16:20:10Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=1</tspan> legit_ai_traffic_passed=1</text>
     </g>
 
     <g class="line8">
-      <text x="0" y="310" class="text">2026-05-18T16:20:12Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted secondary scan routing frame from 1.2.3.4</text>
-      <text x="0" y="330" class="text">2026-05-18T16:20:12Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=2</tspan> legit_ai_traffic_passed=1</text>
+      <text x="0" y="355" class="text">2026-05-18T16:20:12Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted secondary scan routing frame from 1.2.3.4</text>
+      <text x="0" y="375" class="text">2026-05-18T16:20:12Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=2</tspan> legit_ai_traffic_passed=1</text>
     </g>
   </g>
 </svg>
