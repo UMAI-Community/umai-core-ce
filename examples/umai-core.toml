@@ -1,0 +1,100 @@
+# UMAI Core — sample local configuration
+#
+# Status: v0.2 roadmap preview.
+#
+# As of v0.1.0 the `umai-loader` binary does NOT parse this file. The
+# loader takes its config via CLI flags (`--iface`, `--kernel-object`,
+# `--xdpgeneric`). The schema below describes what the v0.2
+# `umai-ce-config` crate will consume. Until then, this file works as:
+#
+#   1. A documented source of truth for operators and reviewers.
+#   2. Input to scripts (see `examples/umai-sync.sh`) that read values
+#      from here and emit equivalent `bpftool` invocations.
+
+# ─── Network interface attachment ────────────────────────────────────────
+
+[interface]
+# Which interface umai-loader should attach the XDP program to.
+name = "eth0"
+
+# Attach mode.
+#   "generic" — required for virtual NICs (Hyper-V, virtio, veth, WSL2).
+#               Runs in the kernel network stack rather than the NIC driver.
+#   "native"  — faster (driver-level), but requires NIC + driver support.
+mode = "generic"
+
+
+# ─── Filesystem paths ────────────────────────────────────────────────────
+
+[paths]
+# Where the prebuilt kernel ELF lives on disk. Produced by Dockerfile.ebpf.
+kernel_object = "dist/umai-kernel"
+
+# Where the loader will pin BPF maps so external tools (bpftool, your own
+# log-parser scripts, fail2ban hooks, etc.) can address them by filesystem
+# path even after the loader exits.
+#
+# v0.1.0: maps are anonymous; pinning is roadmap.
+# v0.2:   loader will mkdir + pin `umai_intel_map` and `umai_counters`
+#         under this directory.
+bpf_pin_dir = "/sys/fs/bpf/umai"
+
+
+# ─── ANS protection (static blocklist) ───────────────────────────────────
+#
+# Source IPv4 addresses or CIDR ranges to deny on ingress. The loader
+# writes these into `umai_intel_map` at startup, and the kernel XDP
+# program returns XDP_DROP for any packet whose source matches.
+#
+# Use cases:
+#   - Known-rogue subnets scanning unauthenticated MCP ports
+#   - C2 infrastructure fronting fake / mismatched Agent Cards
+#   - Aggressive vector-store crawlers targeting local AI infrastructure
+#   - Public IP ranges that should never originate AI-protocol handshakes
+#     against your internal model servers
+#
+# Single IPs and CIDRs are both supported. CIDRs expand to individual
+# /32 entries at load time (the kernel map is u32-keyed; LPM trie support
+# is also roadmap).
+
+[ans_protection]
+blocklist = [
+  # Example: rogue subnet observed scanning unauthenticated MCP ports
+  "203.0.113.0/24",
+  # Example: C2 endpoint serving fake Agent Cards
+  "198.51.100.42",
+  # Example: aggressive vector-store crawler
+  "192.0.2.0/24",
+]
+
+# Free-form audit notes. Keys must match entries in `blocklist`. These are
+# never sent anywhere — purely for operator / on-call triage context.
+[ans_protection.notes]
+"203.0.113.0/24" = "Honeypot-flagged 2026-04-12 — Tor-fronted MCP discovery"
+"198.51.100.42"  = "Known C2 endpoint; signed Agent Card mismatch"
+"192.0.2.0/24"   = "RFC 5737 documentation range — placeholder example only"
+
+
+# ─── Telemetry heartbeat ─────────────────────────────────────────────────
+
+[telemetry]
+# How often the loader emits aggregate counter heartbeats to stdout.
+heartbeat_secs = 2
+
+# Suppress heartbeat lines that report zero traffic (avoids log spam when
+# the interface is idle).
+silence_when_idle = true
+
+
+# ─── Cloud sync (Premium / Enterprise tiers — ignored by CE) ─────────────
+#
+# These fields exist so a single config file format works across CE and
+# the paid tiers. CE builds (`cargo build --no-default-features --features ce`)
+# compile out the HTTP client entirely and ignore this block.
+#
+# See https://umai.entelijan.com for tier comparison and intel-key signup.
+
+[cloud]
+intel_sync_url      = "https://umai.entelijan.com/api/v1/intel/sync"
+intel_bearer_env    = "UMAI_INTEL_BEARER"   # env var holding the bearer token
+pull_interval_secs  = 300

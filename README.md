@@ -77,6 +77,32 @@ The internet is evolving past a static collection of pages into a high-computati
 
 UMAI Core is our open-source contribution to this mission. We build the bare-metal software plumbing, secure data pipelines, and hardware isolation platforms required to protect, validate, and stabilize AI systems. Our goal is to transform network visibility, turning probabilistic AI conversational states into hard, deterministic infrastructure defense.
 
+## Local Configuration & Automation
+
+UMAI Core's intel map (`umai_intel_map`) is fully writable from userspace, so you can feed it with rules from a static config file, a log-parser cron job, your existing IDS hook, or whatever upstream system already knows what to block. The `examples/` directory ships two starting points.
+
+### `examples/umai-core.toml`
+
+Sample configuration showing the intended schema for v0.2's TOML config loader — interface defaults, ANS-protection blocklists with operator audit notes, and (for paid tiers) cloud-sync wiring. v0.1.0's loader doesn't yet parse this file directly, but it serves today as a documented source of truth that scripts and operators can read against.
+
+### `examples/umai-sync.sh`
+
+A small bash wrapper around `bpftool map update / delete` that lets any upstream tool inject or remove IPv4 signatures at runtime — no loader recompile, no daemon restart:
+
+```bash
+sudo ./examples/umai-sync.sh 198.51.100.42 block     # add to intel map
+sudo ./examples/umai-sync.sh 198.51.100.42 unblock   # remove from intel map
+sudo ./examples/umai-sync.sh list                    # dump current entries
+sudo ./examples/umai-sync.sh stats                   # per-CPU drop / pass counters
+```
+
+Wire this into:
+
+- `fail2ban` action scripts — escalate from `iptables` → kernel-level `XDP_DROP`
+- Suricata / Snort `eve.json` parsers — auto-block IPs above a noise threshold
+- Honeypot tooling — promote attacking IPs into the live map automatically
+- CI / GitOps — deploy blocklist changes as code alongside the rest of your infrastructure
+
 ## 📄 License
 
 UMAI Core (Community Edition) is dual-licensed:
