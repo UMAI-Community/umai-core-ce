@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 480" width="100%" height="100%">
   <style>
     .bg { fill: #282a36; rx: 8px; }
     .terminal-header { fill: #44475a; }
@@ -13,7 +13,6 @@
     .log-block { fill: #ff5555; font-weight: bold; }
     .log-pass { fill: #50fa7b; }
 
-    /* Global Infinite Loop Timeline (Total 18 Seconds) */
     @keyframes line-fade {
       0%, 100% { opacity: 0; }
       1% { opacity: 1; }
@@ -21,19 +20,14 @@
       96% { opacity: 0; }
     }
 
-    /* Pure-SVG ClipPath Width Reveals to Simulate Typing */
     @keyframes reveal-width {
       0% { width: 0; }
-      100% { width: 600px; }
+      100% { width: 750px; }
     }
 
     .line-comment { animation: line-fade 18s infinite; animation-delay: 0.5s; opacity: 0; }
     .prompt-block { animation: line-fade 18s infinite; animation-delay: 1.2s; opacity: 0; }
-
-    /* Type out part 1 of the command string */
     .cmd-part1 { animation: reveal-width 2.2s steps(45, end) forwards; animation-delay: 1.8s; }
-
-    /* Reveal part 2 of the command after the line wrap break */
     .cmd-part2 { animation: reveal-width 1.2s steps(30, end) forwards; animation-delay: 4.0s; }
 
     .line-boot { animation: line-fade 18s infinite; animation-delay: 5.5s; opacity: 0; }
@@ -54,13 +48,13 @@
     </clipPath>
   </defs>
 
-  <rect width="800" height="480" class="bg" />
+  <rect width="950" height="480" class="bg" />
 
-  <path d="M 0,0 H 800 V 30 H 0 Z" class="terminal-header" />
+  <path d="M 0,0 H 950 V 30 H 0 Z" class="terminal-header" />
   <circle cx="20" cy="15" r="6" class="dot-red" />
   <circle cx="40" cy="15" r="6" class="dot-yellow" />
   <circle cx="60" cy="15" r="6" class="dot-green" />
-  <text x="360" y="20" class="text" font-size="12">debian@umai-dev: ~</text>
+  <text x="435" y="20" class="text" font-size="12">debian@umai-dev: ~</text>
 
   <g transform="translate(20, 60)">
 
@@ -70,15 +64,13 @@
 
     <g class="prompt-block">
       <text x="0" y="20" class="text"><tspan class="cmd">debian@umai-dev:~$</tspan></text>
-
       <text x="135" y="20" class="text" clip-path="url(#clip-line1)">sudo ./target/release/umai-loader --iface eth0 \</text>
-
       <text x="20" y="40" class="text" clip-path="url(#clip-line2)">--kernel-object dist/umai-kernel --xdpgeneric</text>
     </g>
 
     <g class="line-boot">
-      <text x="0" y="75" class="text"><tspan class="log-info">INFO</tspan> umai-loader starting | iface=eth0 xdpgeneric=true</text>
-      <text x="0" y="95" class="text"><tspan class="log-info">INFO</tspan> loaded ELF into memory | bytes=1872</text>
+      <text x="0" y="75"  class="text"><tspan class="log-info">INFO</tspan> umai-loader starting | iface=eth0 xdpgeneric=true</text>
+      <text x="0" y="95"  class="text"><tspan class="log-info">INFO</tspan> loaded ELF into memory | bytes=1872</text>
       <text x="0" y="115" class="text"><tspan class="log-info">INFO</tspan> attached XDP hook to interface: eth0 (Mode: XDP_GENERIC)</text>
       <text x="0" y="135" class="text"><tspan class="log-info">INFO</tspan> [v0.2-roadmap] parsing wire-level AI protocols [ANS Subnets, MCP Core]</text>
       <text x="0" y="155" class="text"><tspan class="log-info">INFO</tspan> starting telemetry heartbeat task (2s interval)</text>
