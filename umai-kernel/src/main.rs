@@ -1,4 +1,4 @@
-//! UMAI Monitor — kernel-side XDP program.
+//! UMAI Core — kernel-side XDP program.
 //!
 //! Iteration 0: source-IPv4 blacklist. The userspace agent pushes entries
 //! into `umai_intel_map`; this program looks each ingress packet's source

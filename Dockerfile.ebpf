@@ -1,4 +1,4 @@
-# UMAI Monitor — pinned eBPF builder image.
+# UMAI Core — pinned eBPF builder image.
 #
 # Why this exists: the aya-rs / Rust nightly / LLVM / bpf-linker compatibility
 # matrix on the host churns every time `cargo update` pulls in a transitive
@@ -8,17 +8,17 @@
 #   - apt versions   : LLVM 20 (1:20.x family) — bpf-linker 0.10.x targets it
 #   - Rust nightly   : nightly-2025-09-15 (Rust 1.87 era; built against LLVM 20)
 #   - bpf-linker     : 0.10.2 with --features llvm-20
-#   - Cargo.lock     : checked in to umai-monitor/ so transitive deps are frozen
+#   - Cargo.lock     : checked in to umai-core-ce/ so transitive deps are frozen
 #
 # Output: a clean BPF ELF object at /out/umai-kernel which the host-side
 # umai-agent loads via aya::Ebpf::load(include_bytes!("...")). The host's
 # runtime kernel attaches it; this image only produces bytecode.
 #
 # Build:
-#   docker build -f Dockerfile.ebpf -t umai-monitor-ebpf:0.1 .
+#   docker build -f Dockerfile.ebpf -t umai-core-ebpf:0.1 .
 #
 # Use:
-#   docker run --rm -v $PWD/dist:/out umai-monitor-ebpf:0.1
+#   docker run --rm -v $PWD/dist:/out umai-core-ebpf:0.1
 #   # Now dist/umai-kernel is a fresh BPF ELF.
 #
 # The host umai-agent reads UMAI_KERNEL_OBJECT (default ../dist/umai-kernel)

@@ -34,39 +34,32 @@ Unlike legacy network appliances or software WAFs, UMAI Core features deep-packe
 
 ### 1. Installation
 
-Clone the repository and compile the user-space Rust agent and kernel-space eBPF bytecode:
+Clone the repository and compile the user-space loader daemon:
 
 ```bash
 git clone https://github.com/UMAI-Community/umai-core-ce.git
 cd umai-core-ce
-cargo build --release
+cargo build --release -p umai-loader --no-default-features --features ce
 ```
 
-### 2. Configure Local Rules & Network Mapping
+### 2. Build or Fetch the Kernel Bytecode
 
-Define your interfaces, internal network boundaries, and protocol execution constraints in your local configuration file:
+The `umai-loader` expects a pre-compiled eBPF object file. You can compile the kernel-space bytecode using our pinned Docker configuration:
 
-```toml
-# umai.toml
-[interface]
-name = "eth0"
-mode = "native"
+```bash
+# Build the specialized eBPF object builder
+docker build -f Dockerfile.ebpf -t umai-core-ebpf:0.1 .
 
-[network]
-internal_cidr = "10.0.0.0/8"
-internal_domains = ["*.entelijan.local"]
-
-[protocols.mcp]
-enforce_strict_jsonrpc = true
-allowed_tools = ["read_db", "fetch_status"]
+# Extract the compiled ELF asset into your directory
+docker run --rm -v $PWD/dist:/out umai-core-ebpf:0.1
 ```
 
 ### 3. Run UMAI Core
 
-Load the eBPF program into the kernel receive queue and launch the local terminal dashboard:
+Load the compiled eBPF program directly into the network interface driver's receive path. (If testing inside a development VM or virtual network namespace where native driver XDP isn't supported, pass the `--xdpgeneric` flag to fall back gracefully):
 
 ```bash
-sudo ./target/release/umai-monitor-agent --config umai.toml
+sudo ./target/release/umai-loader --iface eth0 --kernel-object dist/umai-kernel --xdpgeneric
 ```
 
 ## About Us
