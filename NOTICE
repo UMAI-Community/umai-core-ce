@@ -1,0 +1,29 @@
+UMAI Core — Community Edition
+Copyright 2026 Entelijan Research
+
+This product is licensed under two open-source licenses, applied
+per-crate so the kernel-resident component can comply with the Linux
+eBPF verifier's GPL-compatibility requirement while the userspace
+components stay permissive:
+
+  * Apache License, Version 2.0 — userspace crates and the
+    workspace as a whole (see LICENSE)
+      - umai-loader   (userspace daemon)
+      - umai-tui      (terminal dashboard)
+      - umai-common   (shared #[repr(C)] types)
+
+  * GNU General Public License, version 2 — kernel-resident crate
+    (see umai-kernel/LICENSE)
+      - umai-kernel   (eBPF/XDP program loaded into the Linux kernel)
+
+The GPL-2.0 boundary is contained: umai-kernel does not import any
+code from the userspace crates, and the userspace crates link to the
+kernel program only via Linux's BPF map file descriptors (an ABI-level
+interface), not source-level dependencies. Per common open-source
+practice (Cilium, Katran, bcc), this two-license layout does not
+"GPL-infect" the userspace crates.
+
+UMAI® and Entelijan® are trademarks of Entelijan Research. Permission
+to use them in modified versions of this software is not granted by
+these licenses; see TRADEMARKS.md (if present) or contact the project
+maintainers for guidance.

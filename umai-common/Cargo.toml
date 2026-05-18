@@ -1,0 +1,17 @@
+[package]
+name = "umai-common"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# When the userspace agent depends on us we want derives, Display impls, the
+# whole std-library surface. The kernel crate sets `default-features = false`.
+default = ["user"]
+user = []
+
+[dependencies]
+# Plain-old-data on both sides of the kernel boundary. Required so the same
+# struct layout describes what kernel writes and what userspace reads.
+bytemuck = { workspace = true }

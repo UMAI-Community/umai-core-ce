@@ -1,0 +1,109 @@
+# UMAI Monitor — pinned eBPF builder image.
+#
+# Why this exists: the aya-rs / Rust nightly / LLVM / bpf-linker compatibility
+# matrix on the host churns every time `cargo update` pulls in a transitive
+# with a bumped MSRV. We escape that by freezing every dimension here:
+#
+#   - Base image     : ubuntu:24.04 (digest-pinned via FROM tag)
+#   - apt versions   : LLVM 20 (1:20.x family) — bpf-linker 0.10.x targets it
+#   - Rust nightly   : nightly-2025-09-15 (Rust 1.87 era; built against LLVM 20)
+#   - bpf-linker     : 0.10.2 with --features llvm-20
+#   - Cargo.lock     : checked in to umai-monitor/ so transitive deps are frozen
+#
+# Output: a clean BPF ELF object at /out/umai-kernel which the host-side
+# umai-agent loads via aya::Ebpf::load(include_bytes!("...")). The host's
+# runtime kernel attaches it; this image only produces bytecode.
+#
+# Build:
+#   docker build -f Dockerfile.ebpf -t umai-monitor-ebpf:0.1 .
+#
+# Use:
+#   docker run --rm -v $PWD/dist:/out umai-monitor-ebpf:0.1
+#   # Now dist/umai-kernel is a fresh BPF ELF.
+#
+# The host umai-agent reads UMAI_KERNEL_OBJECT (default ../dist/umai-kernel)
+# instead of relying on aya-build, so this image is the single source of
+# truth for the kernel-side bytecode across any dev box.
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CARGO_HOME=/opt/cargo \
+    RUSTUP_HOME=/opt/rustup \
+    PATH=/opt/cargo/bin:/usr/lib/llvm-20/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# ── 1. apt deps (pinned to LLVM 20 family) ──────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl build-essential pkg-config \
+        llvm-20 llvm-20-dev clang-20 \
+        libpolly-20-dev libncurses-dev libz-dev libzstd-dev libelf-dev \
+        protobuf-compiler \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Sanity-check the LLVM install — fails the build immediately if Ubuntu
+# bumps the package version family.
+RUN llvm-config-20 --version | grep -q '^20\.' \
+    && ln -sf /usr/bin/llvm-config-20 /usr/local/bin/llvm-config
+
+# ── 2. rustup + pinned nightly ──────────────────────────────────────────
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --default-toolchain none --no-modify-path \
+    && rustup install nightly-2025-09-15 --component rust-src --component rustfmt \
+    && rustup install stable --component rust-src --component rustfmt --component clippy \
+    && rustup default stable
+
+# ── 3. bpf-linker 0.10.2 against LLVM 20 ────────────────────────────────
+# This is the exact recipe that escapes the version-window squeeze:
+#   * bpf-linker 0.9.x → LLVM 18 (Rust nightlies pre-edition2024 — blocked)
+#   * bpf-linker 0.10.x → LLVM 20 (Rust nightly mid-2025, what we use)
+#   * Current bpf-linker has no LLVM-19 variant; 19 is the unreachable middle.
+RUN LLVM_SYS_201_PREFIX=/usr/lib/llvm-20 \
+    RUSTFLAGS='-L /usr/lib/llvm-20/lib -l tinfo' \
+    cargo install bpf-linker --version 0.10.2 \
+        --features llvm-20 --no-default-features --locked --force \
+    && bpf-linker --version
+
+# ── 4. Workspace mount point + build script ─────────────────────────────
+WORKDIR /workspace
+COPY . /workspace/
+
+# The build invokes `cargo +nightly-2025-09-15 build` for the kernel crate
+# directly — bypassing aya-build's workspace dance — and writes the linked
+# ELF to /out/umai-kernel. The directory mount in `docker run` puts that
+# file on the host side.
+ENV BPF_TARGET=bpfel-unknown-none
+RUN apt-get update && apt-get install -y --no-install-recommends file && rm -rf /var/lib/apt/lists/*
+
+RUN echo '#!/usr/bin/env bash\n\
+set -eux\n\
+mkdir -p /out\n\
+cd /workspace\n\
+\n\
+# Pin transitive deps that bumped MSRV past our nightly. cargo-platform\n\
+# 0.3.3 requires rustc 1.91; we are on nightly-2025-09-15 = rustc 1.88.\n\
+# 0.3.2 is the last release that supports it. We re-pin every build so a\n\
+# stale Cargo.lock from a prior run does not poison things.\n\
+rm -f Cargo.lock\n\
+cargo +nightly-2025-09-15 generate-lockfile\n\
+cargo +nightly-2025-09-15 update -p cargo-platform --precise 0.3.2 || true\n\
+cargo +nightly-2025-09-15 update -p zmij --precise 1.0.20 || true\n\
+\n\
+cargo +nightly-2025-09-15 build \\\n\
+    -Z build-std=core \\\n\
+    --release \\\n\
+    --package umai-kernel \\\n\
+    --target ${BPF_TARGET} \\\n\
+    --no-default-features\n\
+\n\
+cp target/${BPF_TARGET}/release/umai-kernel /out/umai-kernel\n\
+echo "[build] wrote $(ls -l /out/umai-kernel)"\n\
+echo "[build] file type:"\n\
+file /out/umai-kernel\n\
+echo "[build] BTF + program sections (proves it is real eBPF):"\n\
+llvm-readelf-20 --section-headers /out/umai-kernel 2>&1 | grep -E "BTF|xdp|umai|maps" | head -15 || true\n\
+echo "[build] map symbols:"\n\
+llvm-nm-20 /out/umai-kernel 2>&1 | grep -E "umai_intel|umai_counter|umai_monitor" | head -5 || true\n\
+' > /usr/local/bin/build-ebpf && chmod +x /usr/local/bin/build-ebpf
+
+ENTRYPOINT ["/usr/local/bin/build-ebpf"]

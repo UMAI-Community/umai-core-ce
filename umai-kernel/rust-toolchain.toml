@@ -1,0 +1,6 @@
+# Kernel crate needs nightly because the bpfel-unknown-none target has no
+# pre-built core, so we depend on `-Z build-std=core` (unstable). The host
+# toolchain at the workspace root stays on stable.
+[toolchain]
+channel = "nightly-2024-11-30"
+components = ["rust-src", "rustfmt"]

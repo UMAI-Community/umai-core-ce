@@ -1,0 +1,67 @@
+name: CI
+
+# Build the userspace crates (umai-loader, umai-tui, umai-common) on
+# every PR + push to main. The umai-kernel crate is intentionally NOT
+# built in CI because its bpfel-unknown-none target needs the pinned
+# nightly + bpf-linker + LLVM toolchain that Dockerfile.ebpf
+# encapsulates — that runs on a separate release-cadence schedule.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  userspace:
+    name: Build + test userspace
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cargo cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build (default features = cloud)
+        run: cargo build --release --workspace --exclude umai-kernel
+
+      - name: Build (CE feature)
+        run: cargo build --release -p umai-loader --no-default-features --features ce
+
+      - name: Test
+        run: cargo test --workspace --exclude umai-kernel
+
+      - name: Clippy
+        run: cargo clippy --workspace --exclude umai-kernel -- -D warnings
+
+      - name: Rustfmt check
+        run: cargo fmt --all -- --check
+
+  kernel-build:
+    name: Build eBPF kernel object (Docker)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build umai-kernel via Dockerfile.ebpf
+        run: |
+          docker build -f Dockerfile.ebpf -t umai-ebpf-build .
+          mkdir -p out
+          docker run --rm -v "$PWD/out":/host umai-ebpf-build cp /out/umai-kernel /host/
+
+      - name: Verify ELF magic
+        run: |
+          file out/umai-kernel
+          test -s out/umai-kernel
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: umai-kernel-elf
+          path: out/umai-kernel
+          retention-days: 30

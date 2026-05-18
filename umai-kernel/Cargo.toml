@@ -1,0 +1,57 @@
+[package]
+name = "umai-kernel"
+version = "0.1.0"
+edition = "2021"
+# eBPF programs MUST carry a GPL-compatible license tag or the Linux
+# verifier rejects them when loaded. The userspace crates (umai-loader,
+# umai-tui, umai-common) are Apache-2.0; this crate alone is GPL-2.0.
+# See LICENSE.kernel at the repo root for the full text.
+license = "GPL-2.0"
+publish = false
+
+[dependencies]
+# Kernel-side Aya runtime + map helpers. Pinned to a known-good version
+# range matching umai-agent's `aya` dep on the userspace side.
+aya-ebpf = "0.1"
+# aya-log-ebpf intentionally NOT pulled in — it transitively depends on
+# `zmij`, which uses unstable Rust intrinsics (select_unpredictable) that
+# break under any nightly old enough to also work with bpf-linker. Drop
+# counters live in the per-CPU array map; that's enough for the iter-1
+# dashboard. v0.2 swaps to a `BPF_MAP_TYPE_RINGBUF` for per-event detail
+# without needing aya-log-ebpf at all.
+
+# Packet header structs (ethhdr, iphdr, etc). Maintained by the Aya
+# community; saves us hand-writing C-equivalent #[repr(C, packed)] structs.
+network-types = "0.0.7"
+
+# Shared types from the workspace, no_std mode (no `user` feature).
+umai-common = { path = "../umai-common", default-features = false }
+
+# The BPF target has no allocator and no `panic_handler`, so dependencies
+# can't carry std::*. Use bytemuck for layout assertions only.
+bytemuck = { version = "1", default-features = false }
+
+[[bin]]
+name = "umai-kernel"
+path = "src/main.rs"
+
+# eBPF objects need tight, predictable layout. Skip strip — the verifier
+# wants symbols. Skip lto — bpf-linker handles linking, and lto here can
+# emit relocations the verifier rejects.
+[profile.dev]
+opt-level = 3
+debug = false
+panic = "abort"
+overflow-checks = false
+
+[profile.release]
+opt-level = 3
+debug = false
+panic = "abort"
+overflow-checks = false
+lto = false
+codegen-units = 1
+
+# Aya's build helpers expect this metadata for the kernel crate.
+[package.metadata.aya]
+ebpf = true

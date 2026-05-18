@@ -1,0 +1,17 @@
+[package]
+name = "umai-tui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+tokio       = { workspace = true }
+tonic       = { workspace = true }
+clap        = { workspace = true }
+anyhow      = { workspace = true }
+tracing     = { workspace = true }
+ratatui     = { workspace = true }
+crossterm   = { workspace = true }
+
+umai-proto  = { path = "../umai-proto" }

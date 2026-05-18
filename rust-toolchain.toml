@@ -1,0 +1,7 @@
+# Host-side toolchain. Stable Rust is sufficient for the userspace agent,
+# the TUI, and the proto crate. The kernel crate (umai-kernel) pins its own
+# nightly toolchain via umai-kernel/rust-toolchain.toml because
+# `bpfel-unknown-none` needs `build-std=core`, which is unstable.
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]

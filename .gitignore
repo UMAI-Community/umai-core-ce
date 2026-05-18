@@ -1,0 +1,27 @@
+# Rust
+/target
+**/target
+**/*.rs.bk
+*.pdb
+Cargo.lock.bak
+
+# IDE / editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Local secrets / runtime
+.env
+.env.*
+*.token
+*.pat
+~$*
+
+# Build artefacts produced by Dockerfile.ebpf
+/dist/

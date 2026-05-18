@@ -1,0 +1,19 @@
+# Always build for the BPF target from this crate. The agent's build.rs
+# invokes `cargo build -p umai-kernel --release` so this config drives that
+# invocation.
+[build]
+target = "bpfel-unknown-none"
+
+# Unstable but required: no pre-built `core` exists for bpfel-unknown-none.
+# The nightly toolchain pinned in rust-toolchain.toml gates this.
+[unstable]
+build-std = ["core"]
+
+[target.bpfel-unknown-none]
+# panic=abort matches the profile in Cargo.toml; --btf preserves BPF Type
+# Format metadata so libbpf relocations on the userspace side resolve cleanly
+# against the kernel's BTF.
+rustflags = [
+    "-C", "panic=abort",
+    "-C", "link-arg=--btf",
+]

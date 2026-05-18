@@ -1,0 +1,69 @@
+# UMAI Core — Community Edition workspace.
+#
+# Four crates make up the CE distribution:
+#   * umai-kernel   — the eBPF/XDP program (runs inside Linux). GPL-2.0.
+#   * umai-loader   — userspace binary that loads + attaches the kernel
+#                     program and (in the cloud feature build) pulls
+#                     intel-sync indicators into the in-kernel LRU map.
+#   * umai-tui      — terminal dashboard rendered with ratatui.
+#   * umai-common   — shared #[repr(C)] structs both kernel and userspace
+#                     read off the same bytes.
+#
+# The umai-kernel crate is intentionally NOT in default-members: it
+# targets `bpfel-unknown-none` and would fail to build with plain
+# `cargo build` on the host. Build it via the Dockerfile.ebpf flow.
+
+[workspace]
+resolver = "2"
+members = [
+    "umai-common",
+    "umai-loader",
+    "umai-tui",
+    "umai-kernel",
+]
+default-members = [
+    "umai-common",
+    "umai-loader",
+    "umai-tui",
+]
+
+[workspace.package]
+version       = "0.1.0"
+edition       = "2021"
+rust-version  = "1.80"
+# Userspace crates are Apache-2.0. The umai-kernel crate overrides this
+# to GPL-2.0 in its own Cargo.toml — eBPF programs MUST declare a
+# GPL-compatible license or the Linux verifier rejects them.
+license       = "Apache-2.0"
+publish       = false
+repository    = "https://github.com/UMAI-Community/umai-core-ce"
+homepage      = "https://github.com/UMAI-Community/umai-core-ce"
+authors       = ["Entelijan Research <opensource@entelijan.com>"]
+
+[workspace.dependencies]
+# eBPF / aya
+aya         = { version = "0.13", default-features = false }
+aya-log     = "0.2"
+aya-build   = "0.1"
+
+# Async runtime
+tokio       = { version = "1", features = ["macros", "rt-multi-thread", "signal", "sync", "time", "net"] }
+
+# CLI / observability
+clap        = { version = "4", features = ["derive", "env"] }
+anyhow      = "1"
+tracing     = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# TUI
+ratatui     = "0.29"
+crossterm   = "0.28"
+
+# Misc
+bytemuck    = { version = "1", features = ["derive"] }
+byteorder   = "1"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

@@ -1,0 +1,41 @@
+[package]
+name = "umai-loader"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# umai-loader has two jobs:
+#   1. Load + attach the kernel ELF, hold its fds so the program stays
+#      resident until SIGINT (this was the iter-0 minimal job).
+#   2. (cloud feature) Poll /api/v1/intel/sync periodically and write
+#      IPv4 indicators into the in-kernel umai_intel_map so the kernel
+#      XDP program drops new threats without a redeploy.
+#
+# Phase A (open-core) splits these via the `ce` feature, which removes
+# the intel-sync poll and the HTTP client entirely. Default build is
+# `cloud` (paid Premium + Enterprise tier).
+
+[features]
+default = ["cloud"]
+ce      = []
+cloud   = ["dep:reqwest", "dep:serde", "dep:serde_json"]
+
+[dependencies]
+aya     = { workspace = true, features = ["async_tokio"] }
+tokio   = { workspace = true }
+clap    = { workspace = true }
+anyhow  = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Shared layout structs for umai_intel_map values — kernel and userspace
+# read the same bytes.
+umai-common = { path = "../umai-common", default-features = true }
+
+# Cloud-only dependencies. Behind feature flag so the Community Edition
+# build (`--no-default-features --features ce`) ships without an HTTP
+# client at all.
+reqwest    = { version = "0.12", default-features = false, features = ["rustls-tls", "json"], optional = true }
+serde      = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
