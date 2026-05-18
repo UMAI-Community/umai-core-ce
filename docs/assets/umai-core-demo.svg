@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 680" width="100%" height="100%">
   <style>
     .bg { fill: #282a36; rx: 8px; }
     .terminal-header { fill: #44475a; }
@@ -13,6 +13,7 @@
     .log-block { fill: #ff5555; font-weight: bold; }
     .log-pass { fill: #50fa7b; }
 
+    /* Optimized Global Infinite Loop Timeline (Total 24 Seconds) */
     @keyframes line-fade {
       0%, 100% { opacity: 0; }
       1% { opacity: 1; }
@@ -25,18 +26,21 @@
       100% { width: 1050px; }
     }
 
-    .line-comment { animation: line-fade 18s infinite; animation-delay: 0.5s; opacity: 0; }
-    .prompt-block { animation: line-fade 18s infinite; animation-delay: 1.2s; opacity: 0; }
-    .cmd-part1 { animation: reveal-width 2.2s steps(45, end) forwards; animation-delay: 1.8s; }
-    .cmd-part2 { animation: reveal-width 1.2s steps(30, end) forwards; animation-delay: 4.0s; }
+    .line-comment { animation: line-fade 24s infinite; animation-delay: 0.5s;  opacity: 0; }
+    .prompt-block { animation: line-fade 24s infinite; animation-delay: 1.2s;  opacity: 0; }
+    .cmd-part1    { animation: reveal-width 2.2s steps(45, end) forwards; animation-delay: 1.8s; }
+    .cmd-part2    { animation: reveal-width 1.2s steps(30, end) forwards; animation-delay: 4.0s; }
 
-    .line-boot { animation: line-fade 18s infinite; animation-delay: 5.5s; opacity: 0; }
-    .line3 { animation: line-fade 18s infinite; animation-delay: 7.5s; opacity: 0; }
-    .line4 { animation: line-fade 18s infinite; animation-delay: 9.0s; opacity: 0; }
-    .line5 { animation: line-fade 18s infinite; animation-delay: 11.0s; opacity: 0; }
-    .line6 { animation: line-fade 18s infinite; animation-delay: 13.0s; opacity: 0; }
-    .line7 { animation: line-fade 18s infinite; animation-delay: 14.5s; opacity: 0; }
-    .line8 { animation: line-fade 18s infinite; animation-delay: 16.0s; opacity: 0; }
+    .line-boot { animation: line-fade 24s infinite; animation-delay: 5.5s;  opacity: 0; }
+    .line3     { animation: line-fade 24s infinite; animation-delay: 7.5s;  opacity: 0; }
+    .line4     { animation: line-fade 24s infinite; animation-delay: 9.0s;  opacity: 0; }
+    .line5     { animation: line-fade 24s infinite; animation-delay: 11.0s; opacity: 0; }
+    .line6     { animation: line-fade 24s infinite; animation-delay: 13.0s; opacity: 0; }
+    .line7     { animation: line-fade 24s infinite; animation-delay: 15.0s; opacity: 0; }
+    .line8     { animation: line-fade 24s infinite; animation-delay: 17.0s; opacity: 0; }
+    .line9     { animation: line-fade 24s infinite; animation-delay: 19.0s; opacity: 0; }
+    .line10    { animation: line-fade 24s infinite; animation-delay: 21.0s; opacity: 0; }
+    .line11    { animation: line-fade 24s infinite; animation-delay: 22.5s; opacity: 0; }
   </style>
 
   <defs>
@@ -48,15 +52,15 @@
     </clipPath>
   </defs>
 
-  <rect width="1200" height="650" class="bg" />
+  <rect width="1300" height="680" class="bg" />
 
-  <path d="M 0,0 H 1200 V 30 H 0 Z" class="terminal-header" />
+  <path d="M 0,0 H 1300 V 30 H 0 Z" class="terminal-header" />
   <circle cx="20" cy="15" r="6" class="dot-red" />
   <circle cx="40" cy="15" r="6" class="dot-yellow" />
   <circle cx="60" cy="15" r="6" class="dot-green" />
-  <text x="555" y="20" class="text" font-size="13">debian@umai-dev: ~</text>
+  <text x="610" y="20" class="text" font-size="13">debian@umai-dev: ~</text>
 
-  <g transform="translate(20, 70)">
+  <g transform="translate(20, 60)">
 
     <g class="line-comment">
       <text x="0" y="0" class="comment"># Run UMAI Core over Generic XDP Driver Path</text>
@@ -72,12 +76,12 @@
       <text x="0" y="104" class="text"><tspan class="log-info">INFO</tspan> umai-loader starting | iface=eth0 xdpgeneric=true</text>
       <text x="0" y="132" class="text"><tspan class="log-info">INFO</tspan> loaded ELF into memory | bytes=1872</text>
       <text x="0" y="160" class="text"><tspan class="log-info">INFO</tspan> attached XDP hook to interface: eth0 (Mode: XDP_GENERIC)</text>
-      <text x="0" y="188" class="text"><tspan class="log-info">INFO</tspan> [v0.2-roadmap] parsing wire-level AI protocols [ANS Subnets, MCP Core]</text>
+      <text x="0" y="188" class="text"><tspan class="log-info">INFO</tspan> [v0.2-roadmap] parsing wire AI protocols [ANS Mesh, MCP Core, A2A, ACP, ANP, LMOS]</text>
       <text x="0" y="216" class="text"><tspan class="log-info">INFO</tspan> starting telemetry heartbeat task (2s interval)</text>
     </g>
 
     <g class="line3">
-      <text x="0" y="263" class="text">2026-05-18T16:20:02Z [<tspan class="log-pass">PASS</tspan>] Traffic Ingress | Src: 10.254.12.44 -&gt; Dest: Local Node | Wire OK</text>
+      <text x="0" y="263" class="text">2026-05-18T16:20:02Z [<tspan class="log-pass">PASS</tspan>] Ingress Frame | Src: 10.254.12.44 -&gt; Dest: Local Node | Protocol: Google-A2A Payload</text>
     </g>
 
     <g class="line4">
@@ -85,12 +89,12 @@
     </g>
 
     <g class="line5">
-      <text x="0" y="338" class="text">2026-05-18T16:20:07Z [<tspan class="log-warn">WARN</tspan>] IDENTIFIED: Malicious Actor Intel Signature match on interface segment from 1.2.3.4</text>
+      <text x="0" y="338" class="text">2026-05-18T16:20:07Z [<tspan class="log-warn">WARN</tspan>] IDENTIFIED: Sub-Surface threat match on interface segment from 1.2.3.4</text>
       <text x="0" y="366" class="text">2026-05-18T16:20:07Z [ACTION] Committing target boundary 1.2.3.4 to kernel space map [umai_intel_map]</text>
     </g>
 
     <g class="line6">
-      <text x="0" y="413" class="text">2026-05-18T16:20:09Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted unauthorized boundary package entry from 1.2.3.4</text>
+      <text x="0" y="413" class="text">2026-05-18T16:20:09Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted unauthenticated IBM-ACP binary embedding vector from 1.2.3.4</text>
     </g>
 
     <g class="line7">
@@ -98,8 +102,19 @@
     </g>
 
     <g class="line8">
-      <text x="0" y="488" class="text">2026-05-18T16:20:12Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted secondary scan routing frame from 1.2.3.4</text>
-      <text x="0" y="516" class="text">2026-05-18T16:20:12Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=2</tspan> legit_ai_traffic_passed=1</text>
+      <text x="0" y="488" class="text">2026-05-18T16:20:12Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Blocked rogue Decentralized ID (DID) handshake on open ANP port from 1.2.3.4</text>
+    </g>
+
+    <g class="line9">
+      <text x="0" y="516" class="text">2026-05-18T16:20:14Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Intercepted un-vetted Eclipse-LMOS mDNS metadata sweep on interface eth0</text>
+    </g>
+
+    <g class="line10">
+      <text x="0" y="544" class="text">2026-05-18T16:20:15Z [<tspan class="log-block">BLOCK</tspan>] XDP_DROP: Mitigated anomalous Agora natural-language translation gateway bypass attempt</text>
+    </g>
+
+    <g class="line11">
+      <text x="0" y="591" class="text">2026-05-18T16:20:16Z [<tspan class="log-info">INFO</tspan>] umai_counters heartbeat | <tspan class="cmd">ai_threat_drops=4</tspan><tspan xml:space="preserve"> legit_ai_traffic_passed=1</tspan></text>
     </g>
   </g>
 </svg>
