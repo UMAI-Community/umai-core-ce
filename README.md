@@ -6,7 +6,7 @@
 
 **The Open-Source Kernel Semantic Firewall (KSF) for the AI Ecosystem**
 
-UMAI Core is not a traditional firewall. It is a lightweight, open-source network monitoring and enforcement agent that runs directly inside the Linux kernel space using eBPF (Extended Berkeley Packet Filter) and XDP (eXpress Data Path).
+UMAI Core is not a traditional firewall. It is a lightweight, open-source network validation and enforcement agent that runs directly inside the Linux kernel space using eBPF (Extended Berkeley Packet Filter) and XDP (eXpress Data Path).
 
 By hooking straight into the earliest possible stage of the network driver's packet entry gate, UMAI Core evaluates and enforces AI application protocols at raw line speed. It inspects conversational structures, tools, and machine identities the exact microsecond they arrive, dropping unauthorized or malicious requests before the main operating system spends memory or CPU cycles processing the packet.
 
@@ -71,9 +71,11 @@ sudo ./target/release/umai-monitor-agent --config umai.toml
 
 ## About Us
 
-Entelijan is an engineering-first, core artificial intelligence intelligence architecture firm specializing in technical telemetry, AI-specific network protocols, and the intersection of machine autonomy with cybersecurity.
+Our mission is to build the technology that helps the world understand, navigate, and secure the AI ecosystem.
 
-We don't look at web application layers through legacy lenses. We build the bare-metal software plumbing, secure data pipelines, and hardware isolation platforms required to protect, validate, and stabilize the machine-to-machine economy. Our mission is to transform network visibility, turning probabilistic AI conversational states into hard, deterministic infrastructure defense.
+The internet is evolving past a static collection of pages into a high-computational landscape of self-healing networks, predictive personalization, and an autonomous agent economy. UMAI Intelligence provides the technical clarity this infrastructure demands. We surface the entire public AI ecosystem—from model servers and capability protocols to agentic payment endpoints—providing the ground truth for an environment expanding faster than it can be secured.
+
+UMAI Core is our open-source contribution to this mission. We build the bare-metal software plumbing, secure data pipelines, and hardware isolation platforms required to protect, validate, and stabilize AI systems. Our goal is to transform network visibility, turning probabilistic AI conversational states into hard, deterministic infrastructure defense.
 
 ## 📄 License
 
