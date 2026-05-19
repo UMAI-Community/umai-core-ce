@@ -1,0 +1,52 @@
+# UMAI Core — playground compose file
+#
+# Two containers on a dedicated bridge so traffic between them traverses
+# a real Linux bridge interface on the host (`br-XXXXXX`) that XDP can
+# attach to.
+#
+#   mock-mcp  — vulnerable mock MCP server bound to :8080 on the bridge.
+#               No auth, exposes a fake `/mcp/exec` "shell.exec" tool that
+#               returns canned output. Stands in for any blindly-exposed
+#               agent endpoint operators forget on the wire.
+#
+#   attacker  — Alpine + curl. Sits idle until `demo-exploit.sh` execs
+#               into it to fire the exploit curl. Having a real source
+#               container means XDP_DROP at the bridge has something
+#               concrete to drop — versus loopback-only traffic which
+#               most XDP drivers can't observe.
+#
+# Bridge subnet is pinned to 172.30.0.0/24 so the demo script always
+# knows where to find both endpoints without parsing `docker network
+# inspect` output.
+
+services:
+  mock-mcp:
+    build: ./mock-mcp
+    container_name: umai-playground-mcp
+    networks:
+      playground:
+        ipv4_address: 172.30.0.10
+    expose:
+      - "8080"
+    restart: "no"
+
+  attacker:
+    image: alpine:3.20
+    container_name: umai-playground-attacker
+    command: ["sh", "-c", "apk add --no-cache curl >/dev/null && sleep infinity"]
+    networks:
+      playground:
+        ipv4_address: 172.30.0.20
+    depends_on:
+      - mock-mcp
+    restart: "no"
+
+networks:
+  playground:
+    name: umai-playground
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1

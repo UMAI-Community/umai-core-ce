@@ -17,6 +17,24 @@ UMAI Core is not a traditional firewall. It is a lightweight, open-source networ
 
 By hooking straight into the earliest possible stage of the network driver's packet entry gate, UMAI Core evaluates and enforces AI application protocols at raw line speed. It inspects conversational structures, tools, and machine identities the exact microsecond they arrive, dropping unauthorized or malicious requests before the main operating system spends memory or CPU cycles processing the packet.
 
+### ⚡ The 60-Second Kernel Sandbox
+
+Watch UMAI Core actually drop a live exploit attempt against a mock MCP server in three commands:
+
+```bash
+git clone https://github.com/UMAI-Community/umai-core-ce.git
+cd umai-core-ce/playground
+sudo ./demo-exploit.sh
+```
+
+You'll see the three stages run end-to-end:
+
+1. **Defenseless** — a mock unauthenticated MCP server starts in a container; an attacker container fires `curl POST /mcp/exec` and gets a fake `shell.exec` root leak back. Real RCE shape.
+2. **Kernel armed** — `umai-loader` attaches the XDP program to the playground's Docker bridge interface; the attacker's IP is injected into `umai_intel_map`.
+3. **The drop** — same exploit, same source, same target — this time the packet is dropped at the bridge by `XDP_DROP`. `bpftool map dump name umai_counters` confirms the drop counter rose; the mock server's process logs show it never saw the second request.
+
+**Requires** Linux 5.10+, Docker, and `bpftool` on the host. First run: ~3–5 minutes (image pulls + loader build). Re-runs: ~30 seconds. Won't work on macOS / Windows Docker Desktop — the VM kernel doesn't expose XDP attach to containers. See [`playground/README.md`](playground/README.md) for full details.
+
 ## 🔌 AI-Exclusive Protocol Target Matrix
 
 Unlike legacy network appliances or software WAFs, UMAI Core features deep-packet parsing engines optimized specifically to inspect and enforce the structured signatures of the autonomous AI ecosystem:
